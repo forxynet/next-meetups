@@ -1,46 +1,48 @@
+import { MongoClient } from 'mongodb';
+
 import MeetupList from '../components/meetups/MeetupList';
 
-const DUMMY_MEETUPS = [
-  {
-    id: 'm1',
-    title: 'A First Meetup',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg',
-    address: 'Some address 5, 12345 Some City',
-    description: 'This is a first meetup!'
-  },
-  {
-    id: 'm2',
-    title: 'A Second Meetup',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg',
-    address: 'Some address 10, 12345 Some City',
-    description: 'This is a second meetup!'
-  }
-];
-
 function HomePage(props) {
-  return <MeetupList meetups={props.meetups} />
+  return <MeetupList meetups={props.meetups} />;
 }
 
-export async function getServerSideProps(context) {
-  const req = context.req;
-  const res = context.res;
-  
-  // fetch data from an API
-  return {
-    props: {
-      meetups: DUMMY_MEETUPS
-    }
-  }
-}
+// export async function getServerSideProps(context) {
+//   const req = context.req;
+//   const res = context.res;
 
-// export async function getStaticProps() {
-//   // fetch data from API
+//   // fetch data from an API
+
 //   return {
 //     props: {
 //       meetups: DUMMY_MEETUPS
-//     },
-//     revalidate: 10 //10 saniye bir yeniden oluştur
-//   }
+//     }
+//   };
 // }
+
+export async function getStaticProps() {
+  // fetch data from an API
+  const client = await MongoClient.connect(
+      'mongodb+srv://forxynet:1m6tgooXjTyxgwdA@cluster0.w33vq.mongodb.net/meetup'
+    );
+  
+  const db = client.db();
+  
+  const meetupCollection = db.collection('meetups');
+  const meetups = await meetupCollection.find().toArray();
+ 
+  client.close();
+    
+  return {
+    props: {
+      meetups: meetups.map(meetup => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString()
+      })),
+    },
+    revalidate: 1
+  }; 
+}
 
 export default HomePage;
