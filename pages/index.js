@@ -1,4 +1,3 @@
-
 import MeetupList from '../components/meetups/MeetupList';
 
 const DUMMY_MEETUPS = [
@@ -18,8 +17,30 @@ const DUMMY_MEETUPS = [
   }
 ];
 
-function HomePage() {
-  return <MeetupList meetups={DUMMY_MEETUPS} />
+function HomePage(props) {
+  return <MeetupList meetups={props.meetups} />
 }
+
+export async function getServerSideProps(context) {
+  const req = context.req;
+  const res = context.res;
+  
+  // fetch data from an API
+  return {
+    props: {
+      meetups: DUMMY_MEETUPS
+    }
+  }
+}
+
+// export async function getStaticProps() {
+//   // fetch data from API
+//   return {
+//     props: {
+//       meetups: DUMMY_MEETUPS
+//     },
+//     revalidate: 10 //10 saniye bir yeniden oluştur
+//   }
+// }
 
 export default HomePage;
